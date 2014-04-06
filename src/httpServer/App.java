@@ -23,6 +23,14 @@ public class App {
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/test", new MyHandler());
         server.createContext("/web", new WebPageHandler());
+        server.createContext("/chart", new chartHandler());
+
+        server.createContext("/amcharts/amcharts.js", new chartLib1Handler());
+        server.createContext("/amcharts/serial.js", new chartLib2Handler());
+        server.createContext("/amcharts/amstock.js", new chartLib3Handler());
+        server.createContext("/amcharts/style.css", new chartCSSHandler());
+        
+        
         
         server.setExecutor(null); // creates a default executor
         server.start();
@@ -80,5 +88,153 @@ public class App {
         }
     }
     
+    static class chartHandler implements HttpHandler{
+        
+        public void handle(HttpExchange t) throws IOException {
+            
+            BufferedReader br = null;
+            String response = null;
+            try {
+                br = new BufferedReader(new FileReader("src/httpServer/chartTests.html"));
+                StringBuilder sb = new StringBuilder();
+                String line = br.readLine();
+
+                while (line != null) {
+                    sb.append(line);
+                    sb.append(System.lineSeparator());
+                    line = br.readLine();
+                }   
+                response = sb.toString();
+            }catch(FileNotFoundException e){
+                e.printStackTrace();
+            } finally {
+                br.close();
+            }                    
+            t.sendResponseHeaders(200, response.length());
+            OutputStream os = t.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }
+    }
+    
+    static class chartLib1Handler implements HttpHandler{
+        
+        public void handle(HttpExchange t) throws IOException {
+            
+            System.out.println("Aqui");
+            BufferedReader br = null;
+            String response = null;
+            try {
+                br = new BufferedReader(new FileReader("src/httpServer/amstockchartLib/amcharts/amcharts.js"));
+                StringBuilder sb = new StringBuilder();
+                String line = br.readLine();
+
+                while (line != null) {
+                    sb.append(line);
+                    sb.append(System.lineSeparator());
+                    line = br.readLine();
+                }   
+                response = sb.toString();
+            }catch(FileNotFoundException e){
+                e.printStackTrace();
+            } finally {
+                br.close();
+            }                    
+            t.sendResponseHeaders(200, response.length());
+            OutputStream os = t.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }
+    }
+    
+    static class chartLib2Handler implements HttpHandler{
+        
+        public void handle(HttpExchange t) throws IOException {
+            
+            System.out.println("Aqui");
+            BufferedReader br = null;
+            String response = null;
+            try {
+                br = new BufferedReader(new FileReader("src/httpServer/amstockchartLib/amcharts/serial.js"));
+                StringBuilder sb = new StringBuilder();
+                String line = br.readLine();
+
+                while (line != null) {
+                    sb.append(line);
+                    sb.append(System.lineSeparator());
+                    line = br.readLine();
+                }   
+                response = sb.toString();
+            }catch(FileNotFoundException e){
+                e.printStackTrace();
+            } finally {
+                br.close();
+            }                    
+            t.sendResponseHeaders(200, response.length());
+            OutputStream os = t.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }
+    }
+    
+    static class chartLib3Handler implements HttpHandler{
+        
+        public void handle(HttpExchange t) throws IOException {
+            
+            System.out.println("Aqui");
+            BufferedReader br = null;
+            String response = null;
+            try {
+                br = new BufferedReader(new FileReader("src/httpServer/amstockchartLib/amcharts/amstock.js"));
+                StringBuilder sb = new StringBuilder();
+                String line = br.readLine();
+
+                while (line != null) {
+                    sb.append(line);
+                    sb.append(System.lineSeparator());
+                    line = br.readLine();
+                }   
+                response = sb.toString();
+            }catch(FileNotFoundException e){
+                e.printStackTrace();
+            } finally {
+                br.close();
+            }                    
+            t.sendResponseHeaders(200, response.length());
+            OutputStream os = t.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }
+    }
+    
+    static class chartCSSHandler implements HttpHandler{
+        
+        public void handle(HttpExchange t) throws IOException {
+            
+            System.out.println("Aqui");
+            BufferedReader br = null;
+            String response = null;
+            try {
+                br = new BufferedReader(new FileReader("src/httpServer/amstockchartLib/amcharts/style.css"));
+                StringBuilder sb = new StringBuilder();
+                String line = br.readLine();
+
+                while (line != null) {
+                    sb.append(line);
+                    sb.append(System.lineSeparator());
+                    line = br.readLine();
+                }   
+                response = sb.toString();
+            }catch(FileNotFoundException e){
+                e.printStackTrace();
+            } finally {
+                br.close();
+            }                    
+            t.sendResponseHeaders(200, response.length());
+            OutputStream os = t.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }
+    }
     
 }
