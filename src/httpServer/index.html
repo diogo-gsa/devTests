@@ -1,0 +1,41 @@
+<!doctype html>
+
+<html>
+	<script>
+	function getRequest(url){
+			//document.write("Begin");	
+			var httpRequest = new XMLHttpRequest();
+			httpRequest.open( "GET", url, false); 	//false == not assyncronous call (no need for handling)
+			httpRequest.send( null );				//it's a GET params send with the URL
+			//document.write("<br>"+httpRequest.responseText+"<br>");	
+			//console.log("<br>"+httpRequest.responseText+"<br>");	
+			//document.write("End");
+			return httpRequest.responseText;
+	}
+	</script>
+
+
+<head>
+</head>
+<body>
+	<h1>Hello</h1>
+	<p>World</p>
+	
+	<script>
+		var bufferArray = [];	
+		
+		var intevalID = setInterval(
+							function(){
+								var response = getRequest("/teste");
+								document.write(response);
+							//	document.write("tick-tack");
+							}, 1000);
+		
+		
+	/*	var response = getRequest("/teste");
+		document.write(response);
+		console.log(response); */
+	</script>
+	
+</body>
+</html>
