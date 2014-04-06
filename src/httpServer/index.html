@@ -12,6 +12,9 @@
 			//document.write("End");
 			return httpRequest.responseText;
 	}
+	
+	//function printArray
+	
 	</script>
 
 
@@ -27,7 +30,9 @@
 		var intevalID = setInterval(
 							function(){
 								var response = getRequest("/teste");
-								document.write(response);
+								bufferArray.push(response);
+								document.write("<br>"+bufferArray.toString());
+								
 							//	document.write("tick-tack");
 							}, 1000);
 		
