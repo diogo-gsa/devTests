@@ -48,8 +48,8 @@
 			
 			var graph = new AmCharts.StockGraph();
 			graph.valueField = "Watts";
-			graph.type = "column";
-			graph.fillAlphas = 1;
+			graph.type = "smoothedLine"; // options: "line", "column", "step", "smoothedLine", "candlestick", "ohlc" 
+			graph.fillAlphas = 0;
 			graph.title = "Value";
 			stockPanel.addStockGraph(graph);
 			
@@ -59,6 +59,30 @@
 			
 			//categoryAxesSettings.equalSpacing = true; //don't show between data gaps
 			
+			var chartScrollbarSettings = new AmCharts.ChartScrollbarSettings();
+			chartScrollbarSettings.graph = graph;
+			chartScrollbarSettings.graphType = "line";
+			chart.chartScrollbarSettings = chartScrollbarSettings;
+			
+			var legend = new AmCharts.StockLegend();
+			stockPanel.stockLegend = legend;
+			
+			var chartCursorSettings = new AmCharts.ChartCursorSettings(); //mostrar legenda no gráfico
+			chartCursorSettings.valueBalloonsEnabled = true;
+			chart.chartCursorSettings = chartCursorSettings;
+			
+			var periodSelector = new AmCharts.PeriodSelector();
+			chart.periodSelector = periodSelector;
+			
+			periodSelector.periods = [
+			                          {period:"DD", count:1, label:"1 day"}, 
+			                          {period:"DD", selected:true, count:5, label:"5 days"},
+			                          {period:"MM", count:1, label:"1 month"},
+			                          {period:"YYYY", count:1, label:"1 year"},
+			                          {period:"YTD", label:"YTD"},
+			                          {period:"MAX", label:"MAX"}
+			                       ];
+			
 			chart.write("chartdiv");
 			});
 			
@@ -66,6 +90,6 @@
 	</head>
 
 	<body>
-		<div id="chartdiv" style="width:50%; height:400px;"></div>
+		<div id="chartdiv" style="width:80%; height:400px; position:fixed; top: 5%; left: 9%"></div>
 	</body>
 </html>
