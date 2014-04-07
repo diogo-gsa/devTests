@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.util.Random;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -16,6 +17,7 @@ public class App {
     
     private static int teste = 1;
     
+    
     public static void main(String[] args) throws Exception { 
         
         int foo = 1;
@@ -24,22 +26,36 @@ public class App {
         server.createContext("/test", new MyHandler());
         server.createContext("/web", new WebPageHandler());
         server.createContext("/chart", new chartHandler());
+        server.createContext("/getRecentData", new randomStreamGen());
 
         server.createContext("/amcharts/amcharts.js", new chartLib1Handler());
         server.createContext("/amcharts/serial.js", new chartLib2Handler());
         server.createContext("/amcharts/amstock.js", new chartLib3Handler());
         server.createContext("/amcharts/style.css", new chartCSSHandler());
         
-        
-        
         server.setExecutor(null); // creates a default executor
         server.start();
         System.out.println("Server is running at: http://localhost:"+port+"/test");
+               
     }
+ 
 
+    static class randomStreamGen implements HttpHandler{
+        public void handle(HttpExchange t) throws IOException {
+            long ts = System.currentTimeMillis();
+            int value = (new Random()).nextInt((800 - 200) + 1) + 200; 
+            System.out.println("Stream Tuple >> ts= "+ts+"|"+"value= "+value);
+            String response = "{ \"ts\": \""+ts+"\", \"reading\": \""+value+"\"}";
+            t.sendResponseHeaders(200, response.length());
+            OutputStream os = t.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }
+    }  
+    
     static class MyHandler implements HttpHandler {
         
-        public void handle(HttpExchange t) throws IOException {
+        public void handle(HttpExchange t) throws IOException {  
             String response = "{ \"id\":   \""+teste+"\"}";
             teste++;
             t.sendResponseHeaders(200, response.length());
