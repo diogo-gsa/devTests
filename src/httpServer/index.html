@@ -13,7 +13,16 @@
 			return httpRequest.responseText;
 	}
 	
-	//function printArray
+	function processRequest(array, dataReading){
+     //   	{date: new Date(2011, 5, 1, 10, 0, 0, 0), val:10},
+	 //		{ "ts": "1396883813350", "reading": "757"}
+     	var readingDate = JSON.parse(dataReading).ts;
+	 	var readingVal	= JSON.parse(dataReading).reading;
+     	var dateR = new Date(readingDate*1); //hack: *1 para converter a string para um inteiro
+		bufferArray.push({date: dateR, val:readingVal});
+     	//console.log(readingDate+" : "+dateR+" | "+readingVal);
+		//document.write("<br>"+bufferArray.toString());
+	}
 	
 	</script>
 
@@ -29,11 +38,15 @@
 		
 		var intevalID = setInterval(
 							function(){
-								var response = getRequest("/teste");
-								bufferArray.push(response);
-								document.write("<br>"+bufferArray.toString());
+								var response = getRequest("/getRecentData");
+								processRequest(bufferArray, response);
 								
-							//	document.write("tick-tack");
+								document.write("<br>"+bufferArray.toString());
+							
+								
+								
+								
+								
 							}, 1000);
 		
 		

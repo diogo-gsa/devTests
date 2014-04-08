@@ -32,6 +32,8 @@ public class App {
         server.createContext("/amcharts/serial.js", new chartLib2Handler());
         server.createContext("/amcharts/amstock.js", new chartLib3Handler());
         server.createContext("/amcharts/style.css", new chartCSSHandler());
+        server.createContext("/amcharts/images/dragIcon.gif", new image1Handler());
+        
         
         server.setExecutor(null); // creates a default executor
         server.start();
@@ -252,5 +254,37 @@ public class App {
             os.close();
         }
     }
+    
+    static class image1Handler implements HttpHandler{
+        
+        public void handle(HttpExchange t) throws IOException {
+            
+            System.out.println("Aqui");
+            BufferedReader br = null;
+            String response = null;
+            try {
+                br = new BufferedReader(new FileReader("src/httpServer/amstockchartLib/amcharts/images/dragIcon.gif"));
+                StringBuilder sb = new StringBuilder();
+                String line = br.readLine();
+
+                while (line != null) {
+                    sb.append(line);
+                    sb.append(System.lineSeparator());
+                    line = br.readLine();
+                }   
+                response = sb.toString();
+            }catch(FileNotFoundException e){
+                e.printStackTrace();
+            } finally {
+                br.close();
+            }                    
+            t.sendResponseHeaders(200, response.length());
+            OutputStream os = t.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }
+    }
+    
+    
     
 }
