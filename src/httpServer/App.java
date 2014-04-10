@@ -45,9 +45,16 @@ public class App {
     static class randomStreamGen implements HttpHandler{
         public void handle(HttpExchange t) throws IOException {
             long ts = System.currentTimeMillis();
-            int value = (new Random()).nextInt((800 - 200) + 1) + 200; 
-            System.out.println("Stream Tuple >> ts= "+ts+"|"+"value= "+value);
+            //int value = (new Random()).nextInt((925 - 875) + 1) + 875; 
+            
+          
+            Sensor sensorLibrary = new Sensor("https://172.20.70.232/reading", "root", "root");
+            double value = sensorLibrary.getNewMeasure().getTotalPower();
+            
+            System.out.println("Stream Tuple >> ts= "+ts+"|"+"value= "+value);  
             String response = "{ \"ts\": \""+ts+"\", \"reading\": \""+value+"\"}";
+            
+
             t.sendResponseHeaders(200, response.length());
             OutputStream os = t.getResponseBody();
             os.write(response.getBytes());

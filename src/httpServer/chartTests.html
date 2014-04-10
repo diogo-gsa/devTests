@@ -41,7 +41,7 @@
 			
 			
 			var chartData= [ //Date -> JScript data type			                 
-			                 {date: new Date(2011, 5, 1, 10, 0, 0, 0), val:10},
+			                 /*{date: new Date(2011, 5, 1, 10, 0, 0, 0), val:10},
 			                 {date: new Date(2011, 5, 1, 11, 0, 0, 0), val:11},
 			                 {date: new Date(2011, 5, 1, 12, 0, 0, 0), val:12},
 			                 {date: new Date(2011, 5, 1, 13, 0, 0, 0), val:11},
@@ -50,13 +50,16 @@
 			                 {date: new Date(2011, 5, 1, 16, 0, 0, 0), val:13},
 			                 {date: new Date(2011, 5, 1, 17, 0, 0, 0), val:14},
 			                 {date: new Date(2011, 5, 1, 18, 0, 0, 0), val:17},
-			                 {date: new Date(2011, 5, 1, 19, 0, 0, 0), val:13}
+			                 {date: new Date(2011, 5, 1, 19, 0, 0, 0), val:13}*/
 			            ];
 			
 			
-			
-			
-			
+			for(var i = 0; i<50; i++){
+				var dataReading = getRequest("/getRecentData");
+		        var newData = processRequest(dataReading);
+		        chartData.push(newData);
+			}
+				
 			
 			var chart = new AmCharts.AmStockChart(); 	//Create chart
 			chart.pathToImages = "amcharts/images/";	//specifie the image path
@@ -80,7 +83,7 @@
 			graph.valueField = "Watts";
 			graph.type = "smoothedLine"; // options: "line", "column", "step", "smoothedLine", "candlestick", "ohlc" 
 			graph.fillAlphas = 0;
-			graph.title = "Value";
+			graph.title = "Biblioteca";
 			stockPanel.addStockGraph(graph);
 			
 			var categoryAxesSettings = new AmCharts.CategoryAxesSettings();
@@ -124,14 +127,14 @@
 			// set up the chart to update every second
 		    setInterval(function () {
 
-		    	chartData.shift();
+		    	//chartData.shift();
 		        var dataReading = getRequest("/getRecentData");
 		        var newData = processRequest(dataReading);
 		        
 		        chartData.push(newData);
 		        chart.validateData();
 		        chart.write("chartdiv");
-		    }, 4000);
+		    }, 7000);
 			
 			
 			});
@@ -146,6 +149,6 @@
 	</head>
 
 	<body>
-		<div id="chartdiv" style="width:80%; height:400px; position:fixed; top: 5%; left: 9%"></div>
+		<div id="chartdiv" style="width:90%; height:400px; position:fixed; top: 5%; left: 5%"></div>
 	</body>
 </html>
