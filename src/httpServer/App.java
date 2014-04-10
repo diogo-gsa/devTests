@@ -49,6 +49,7 @@ public class App {
             
           
             Sensor sensorLibrary = new Sensor("https://172.20.70.232/reading", "root", "root");
+            
             double value = sensorLibrary.getNewMeasure().getTotalPower();
             
             System.out.println("Stream Tuple >> ts= "+ts+"|"+"value= "+value);  
