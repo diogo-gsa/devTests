@@ -14,15 +14,14 @@ import com.sun.net.httpserver.HttpServer;
 
 public class App {
 
-    
     private static int teste = 1;
+    private static int __PORT__ = 62490;
     
     
     public static void main(String[] args) throws Exception { 
         
-        int foo = 1;
-        int port = 62490;
-        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+       
+        HttpServer server = HttpServer.create(new InetSocketAddress(__PORT__), 0);
         server.createContext("/test", new MyHandler());
         server.createContext("/web", new WebPageHandler());
         server.createContext("/chart", new chartHandler());
@@ -37,7 +36,7 @@ public class App {
         
         server.setExecutor(null); // creates a default executor
         server.start();
-        System.out.println("Server is running at: http://localhost:"+port+"/test");
+        System.out.println("Server is running at: http://localhost:"+__PORT__+"/test");
                
     }
  
