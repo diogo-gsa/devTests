@@ -27,16 +27,13 @@ public class App {
         server.createContext("/chart", new chartHandler());
         server.createContext("/getRecentData", new randomStreamGen());
 
-        server.createContext("/amcharts/amcharts.js", new chartLib1Handler());
-        server.createContext("/amcharts/serial.js", new chartLib2Handler());
-        server.createContext("/amcharts/amstock.js", new chartLib3Handler());
-        server.createContext("/amcharts/style.css", new chartCSSHandler());
-        server.createContext("/amcharts/images/dragIcon.gif", new image1Handler());
+        server.createContext("/amcharts/", new chartLib1Handler());
+        server.createContext("/amcharts/images/", new image1Handler());
         
         
         server.setExecutor(null); // creates a default executor
         server.start();
-        System.out.println("Server is running at: http://localhost:"+__PORT__+"/test");
+        System.out.println("Server is running at: "+server.getAddress());
                
     }
  
@@ -46,11 +43,10 @@ public class App {
             long ts = System.currentTimeMillis();
             //int value = (new Random()).nextInt((925 - 875) + 1) + 875; 
             
-          
             Sensor sensorLibrary = new Sensor("https://172.20.70.232/reading", "root", "root");
             
             double value = sensorLibrary.getNewMeasure().getTotalPower();
-            
+                        
             System.out.println("Stream Tuple >> ts= "+ts+"|"+"value= "+value);  
             String response = "{ \"ts\": \""+ts+"\", \"reading\": \""+value+"\"}";
             
@@ -74,38 +70,40 @@ public class App {
         }
     }
 
-    
     static class WebPageHandler implements HttpHandler{
-        
         public void handle(HttpExchange t) throws IOException {
+            String response = readFile("src/httpServer/index.html");
+            t.sendResponseHeaders(200, response.length());
+            OutputStream os = t.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }
+    }
+    
+    static class chartHandler implements HttpHandler{        
+        public void handle(HttpExchange t) throws IOException {
+            String response = readFile("src/httpServer/chartTests.html");                   
+            t.sendResponseHeaders(200, response.length());
+            OutputStream os = t.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }
+    }
+    
+    static class chartLib1Handler implements HttpHandler{        
+        public void handle(HttpExchange t) throws IOException {
+            String requestURI = t.getRequestURI().getPath(); //*all* URI requests
+            String requestedFile = requestURI.split("/")[2]; //extract resource name (eg. amcharts.js)
             
-            BufferedReader br = null;
-            String response = null;
-            try {
-            System.out.println("AA");
-            System.out.println(System.getProperty("user.dir")); 
-            br = new BufferedReader(new FileReader("src/httpServer/index.html"));
-            System.out.println("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
-            
-                StringBuilder sb = new StringBuilder();
-                String line = br.readLine();
-
-                while (line != null) {
-                    sb.append(line);
-                    sb.append(System.lineSeparator());
-                    line = br.readLine();
-                }
-                response = sb.toString();
-            }catch(FileNotFoundException e){
-                System.out.println("CC");
-                e.printStackTrace();
-                System.out.println("DD");
-            } finally {
-                br.close();
+            String response = "";
+            switch(requestedFile){
+                case "style.css"    :
+                case "amstock.js"   :
+                case "serial.js"    :
+                case "amcharts.js"  :   response = readFile("src/httpServer/amstockchartLib/amcharts/"+requestedFile); 
+                                        System.out.println("Loaded: "+requestedFile); break;
             }
-            System.out.println("EE");
-          
-                    
+            
             t.sendResponseHeaders(200, response.length());
             OutputStream os = t.getResponseBody();
             os.write(response.getBytes());
@@ -113,28 +111,24 @@ public class App {
         }
     }
     
-    static class chartHandler implements HttpHandler{
+    static class image1Handler implements HttpHandler{
         
         public void handle(HttpExchange t) throws IOException {
             
-            BufferedReader br = null;
-            String response = null;
-            try {
-                br = new BufferedReader(new FileReader("src/httpServer/chartTests.html"));
-                StringBuilder sb = new StringBuilder();
-                String line = br.readLine();
-
-                while (line != null) {
-                    sb.append(line);
-                    sb.append(System.lineSeparator());
-                    line = br.readLine();
-                }   
-                response = sb.toString();
-            }catch(FileNotFoundException e){
-                e.printStackTrace();
-            } finally {
-                br.close();
-            }                    
+            System.out.println("*****************************************************");
+            String requestURI = t.getRequestURI().getPath(); //*all* URI requests
+            String requestedFile = requestURI.split("/")[3]; //extract resource name (eg. amcharts.js)
+            
+            System.out.println("--:"+requestURI);
+            System.out.println("-->"+requestedFile);        
+            
+            String response = readFile("src/httpServer/amstockchartLib/amcharts/images/"+requestedFile);
+            System.out.println("Loaded: "+requestedFile);
+            
+            
+            //TODO LER IMAGEM EM BINARIO EM VEZ DE STRING COMO ESTAS A FAZER AGORA
+            // TODO AHUSTAR O CONTENT TYPE
+            t.getResponseHeaders().set("Content-Type", "application/gif"); //<------------------------------------------ Estas Aqui
             t.sendResponseHeaders(200, response.length());
             OutputStream os = t.getResponseBody();
             os.write(response.getBytes());
@@ -142,101 +136,13 @@ public class App {
         }
     }
     
-    static class chartLib1Handler implements HttpHandler{
-        
-        public void handle(HttpExchange t) throws IOException {
-            
-            System.out.println("Aqui");
-            BufferedReader br = null;
-            String response = null;
-            try {
-                br = new BufferedReader(new FileReader("src/httpServer/amstockchartLib/amcharts/amcharts.js"));
-                StringBuilder sb = new StringBuilder();
-                String line = br.readLine();
-
-                while (line != null) {
-                    sb.append(line);
-                    sb.append(System.lineSeparator());
-                    line = br.readLine();
-                }   
-                response = sb.toString();
-            }catch(FileNotFoundException e){
-                e.printStackTrace();
-            } finally {
-                br.close();
-            }                    
-            t.sendResponseHeaders(200, response.length());
-            OutputStream os = t.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-        }
-    }
     
-    static class chartLib2Handler implements HttpHandler{
-        
-        public void handle(HttpExchange t) throws IOException {
-            
-            System.out.println("Aqui");
-            BufferedReader br = null;
-            String response = null;
-            try {
-                br = new BufferedReader(new FileReader("src/httpServer/amstockchartLib/amcharts/serial.js"));
-                StringBuilder sb = new StringBuilder();
-                String line = br.readLine();
-
-                while (line != null) {
-                    sb.append(line);
-                    sb.append(System.lineSeparator());
-                    line = br.readLine();
-                }   
-                response = sb.toString();
-            }catch(FileNotFoundException e){
-                e.printStackTrace();
-            } finally {
-                br.close();
-            }                    
-            t.sendResponseHeaders(200, response.length());
-            OutputStream os = t.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-        }
-    }
-    
-    static class chartLib3Handler implements HttpHandler{
-        
-        public void handle(HttpExchange t) throws IOException {
-            
-            System.out.println("Aqui");
-            BufferedReader br = null;
-            String response = null;
-            try {
-                br = new BufferedReader(new FileReader("src/httpServer/amstockchartLib/amcharts/amstock.js"));
-                StringBuilder sb = new StringBuilder();
-                String line = br.readLine();
-
-                while (line != null) {
-                    sb.append(line);
-                    sb.append(System.lineSeparator());
-                    line = br.readLine();
-                }   
-                response = sb.toString();
-            }catch(FileNotFoundException e){
-                e.printStackTrace();
-            } finally {
-                br.close();
-            }                    
-            t.sendResponseHeaders(200, response.length());
-            OutputStream os = t.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-        }
-    }
     
     static class chartCSSHandler implements HttpHandler{
         
         public void handle(HttpExchange t) throws IOException {
             
-            System.out.println("Aqui");
+            System.out.println("Aqui[17]");
             BufferedReader br = null;
             String response = null;
             try {
@@ -262,36 +168,36 @@ public class App {
         }
     }
     
-    static class image1Handler implements HttpHandler{
-        
-        public void handle(HttpExchange t) throws IOException {
-            
-            System.out.println("Aqui");
-            BufferedReader br = null;
-            String response = null;
-            try {
-                br = new BufferedReader(new FileReader("src/httpServer/amstockchartLib/amcharts/images/dragIcon.gif"));
-                StringBuilder sb = new StringBuilder();
-                String line = br.readLine();
-
-                while (line != null) {
-                    sb.append(line);
-                    sb.append(System.lineSeparator());
-                    line = br.readLine();
-                }   
-                response = sb.toString();
-            }catch(FileNotFoundException e){
-                e.printStackTrace();
-            } finally {
-                br.close();
-            }                    
-            t.sendResponseHeaders(200, response.length());
-            OutputStream os = t.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-        }
-    }
     
+    
+    private static String readFile(String filename){
+        
+        //String filename = "src/httpServer/index.html";
+        BufferedReader br = null;
+        String response = null;
+        StringBuilder sb = new StringBuilder();
+        
+        try {
+            //System.out.println(System.getProperty("user.dir")); //DEBUG 
+            br = new BufferedReader(new FileReader(filename));         
+            String line = br.readLine();
+            while (line != null) {
+                sb.append(line);
+                sb.append(System.lineSeparator());
+                line = br.readLine();
+            }
+            response = sb.toString();
+        }catch(IOException e){
+            e.printStackTrace();
+        } finally {
+            try {
+                br.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return response;
+    }
     
     
 }

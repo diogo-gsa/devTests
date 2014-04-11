@@ -54,7 +54,7 @@
 			            ];
 			
 			
-			for(var i = 0; i<50; i++){
+			for(var i = 0; i<2; i++){
 				var dataReading = getRequest("/getRecentData");
 		        var newData = processRequest(dataReading);
 		        chartData.push(newData);
@@ -134,17 +134,13 @@
 		        chartData.push(newData);
 		        chart.validateData();
 		        chart.write("chartdiv");
+		        console.log("ChartArraySize: "+chartData.length);
 		    }, 7000);
 			
 			
 			});
-			
-			
-			
+						
 		</script>
-	
-	
-	
 	
 	</head>
 
