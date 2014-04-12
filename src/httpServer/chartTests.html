@@ -28,6 +28,7 @@
 		     //   	{date: new Date(2011, 5, 1, 10, 0, 0, 0), val:10},
 			 //		{ "ts": "1396883813350", "reading": "757"}
 		     	var readingDate = JSON.parse(dataReading).ts;
+		     	console.log("Readed TS:"+readingDate);
 			 	var readingVal	= JSON.parse(dataReading).reading;
 		     	var dateR = new Date(readingDate*1); //hack: *1 para converter a string para um inteiro
 				return {date: dateR, val:readingVal};
