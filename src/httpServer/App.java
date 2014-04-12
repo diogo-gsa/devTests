@@ -27,13 +27,20 @@ public class App {
         
        
         HttpServer server = HttpServer.create(new InetSocketAddress(__PORT__), 0);
-        server.createContext("/test", new MyHandler());
-        server.createContext("/web", new WebPageHandler());
-        server.createContext("/chart", new chartHandler());
-        server.createContext("/getRecentData", new randomStreamGen());
+        
+        //server.createContext("/test", new MyHandler());
+        //server.createContext("/web", new WebPageHandler());
+        
+        
+        // Chart WebPage Init Handlers
+        server.createContext("/chart", new ChartPageRequestHandler());
+        server.createContext("/amcharts/", new LibsRequestHandler());
+        server.createContext("/amcharts/images/", new ImagesRequestHandler());
+        
+        // Chart API Handlers
+        server.createContext("/getRecentData", new GetRecentDataRequestHandler());
 
-        server.createContext("/amcharts/", new chartLib1Handler());
-        server.createContext("/amcharts/images/", new image1Handler());
+        
         
         
         server.setExecutor(null); // creates a default executor
@@ -43,7 +50,7 @@ public class App {
     }
  
 
-    static class randomStreamGen implements HttpHandler{
+    static class GetRecentDataRequestHandler implements HttpHandler{
         public void handle(HttpExchange t) throws IOException {
             long ts = System.currentTimeMillis();
             //int value = (new Random()).nextInt((925 - 875) + 1) + 875; 
@@ -62,7 +69,8 @@ public class App {
             os.close();
         }
     }  
-    
+
+/*
     static class MyHandler implements HttpHandler {
         
         public void handle(HttpExchange t) throws IOException {  
@@ -74,7 +82,8 @@ public class App {
             os.close();
         }
     }
-
+*/
+/*
     static class WebPageHandler implements HttpHandler{
         public void handle(HttpExchange t) throws IOException {
             String response = readFile("src/httpServer/index.html");
@@ -84,8 +93,9 @@ public class App {
             os.close();
         }
     }
+*/
     
-    static class chartHandler implements HttpHandler{        
+    static class ChartPageRequestHandler implements HttpHandler{        
         public void handle(HttpExchange t) throws IOException {
             String response = readFile("src/httpServer/chartTests.html");                   
             t.sendResponseHeaders(200, response.length());
@@ -95,7 +105,7 @@ public class App {
         }
     }
     
-    static class chartLib1Handler implements HttpHandler{        
+    static class LibsRequestHandler implements HttpHandler{        
         public void handle(HttpExchange t) throws IOException {
             String requestURI = t.getRequestURI().getPath(); //*all* URI requests
             String requestedFile = requestURI.split("/")[2]; //extract resource name (eg. amcharts.js)
@@ -116,7 +126,7 @@ public class App {
         }
     }
     
-    static class image1Handler implements HttpHandler{
+    static class ImagesRequestHandler implements HttpHandler{
         
         public void handle(HttpExchange t) throws IOException {
             
@@ -134,36 +144,7 @@ public class App {
     }
     
     
-    
-    static class chartCSSHandler implements HttpHandler{
-        
-        public void handle(HttpExchange t) throws IOException {
-            
-            System.out.println("Aqui[17]");
-            BufferedReader br = null;
-            String response = null;
-            try {
-                br = new BufferedReader(new FileReader("src/httpServer/amstockchartLib/amcharts/style.css"));
-                StringBuilder sb = new StringBuilder();
-                String line = br.readLine();
-
-                while (line != null) {
-                    sb.append(line);
-                    sb.append(System.lineSeparator());
-                    line = br.readLine();
-                }   
-                response = sb.toString();
-            }catch(FileNotFoundException e){
-                e.printStackTrace();
-            } finally {
-                br.close();
-            }                    
-            t.sendResponseHeaders(200, response.length());
-            OutputStream os = t.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-        }
-    }
+   
     
     
     
