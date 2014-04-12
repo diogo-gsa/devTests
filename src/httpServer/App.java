@@ -1,12 +1,17 @@
 package httpServer;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.Random;
+
+import javax.imageio.ImageIO;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -115,23 +120,15 @@ public class App {
         
         public void handle(HttpExchange t) throws IOException {
             
-            System.out.println("*****************************************************");
             String requestURI = t.getRequestURI().getPath(); //*all* URI requests
             String requestedFile = requestURI.split("/")[3]; //extract resource name (eg. amcharts.js)
             
-            System.out.println("--:"+requestURI);
-            System.out.println("-->"+requestedFile);        
-            
-            String response = readFile("src/httpServer/amstockchartLib/amcharts/images/"+requestedFile);
+            byte[] response = readImageGIF("src/httpServer/amstockchartLib/amcharts/images/"+requestedFile);
             System.out.println("Loaded: "+requestedFile);
             
-            
-            //TODO LER IMAGEM EM BINARIO EM VEZ DE STRING COMO ESTAS A FAZER AGORA
-            // TODO AHUSTAR O CONTENT TYPE
-            t.getResponseHeaders().set("Content-Type", "application/gif"); //<------------------------------------------ Estas Aqui
-            t.sendResponseHeaders(200, response.length());
+            t.sendResponseHeaders(200, response.length);
             OutputStream os = t.getResponseBody();
-            os.write(response.getBytes());
+            os.write(response);
             os.close();
         }
     }
@@ -197,6 +194,22 @@ public class App {
             }
         }
         return response;
+    }
+    
+    private static byte[] readImageGIF(String filename){
+       
+        ByteArrayOutputStream baos = null;
+        try {
+            File fnew=new File(filename);
+            BufferedImage originalImage=ImageIO.read(fnew);
+            baos=new ByteArrayOutputStream();
+            ImageIO.write(originalImage, "gif", baos );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        byte[] imageInByte=baos.toByteArray();
+        return imageInByte;
+        
     }
     
     
