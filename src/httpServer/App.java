@@ -35,27 +35,40 @@ public class App {
         server.createContext("/amcharts/images/", new ImagesRequestHandler());
         
         // Chart API Handlers
-        server.createContext("/getRecentData", new GetRecentDataRequestHandler());
-
-         
+        server.createContext("/getLastReading", new getLastReading());
+                 
         server.setExecutor(null); // creates a default executor
         server.start();
         System.out.println("Server is running at: "+server.getAddress());
                
     }
- 
-
-    static class GetRecentDataRequestHandler implements HttpHandler{
+    //getLastReading(SensorId sensor, List<DatapointAddress> datapoints)
+    static class getLastReading implements HttpHandler{
         public void handle(HttpExchange t) throws IOException {
-            Sensor sensorLibrary = new Sensor("https://172.20.70.232/reading", "root", "root");            
-            double value = sensorLibrary.getNewMeasure().getTotalPower();                        
-            long ts = sensorLibrary.getNewMeasure().geTimestamp()*1000;            
-            String response = "{ \"ts\": \""+ts+"\", \"reading\": \""+value+"\"}";            
-            //System.out.println("Stream Tuple >> ts= "+ts+"|"+"value= "+value);  //DEBUG
+            // example:  /getLastReading?idSensor=library
+            String parametersListURI = t.getRequestURI().getQuery();    // get the "idSensor=library" URL's part            
+            String sensorId = parametersListURI.split("=")[1];          //extract resource name (eg. amcharts.js)
+            Sensor sensor = null;
+            switch(sensorId){
+                case "library"          : sensor = new Sensor("https://172.20.70.232/reading", "root", "root"); break;
+                case "kernel_14"        : sensor = new Sensor("https://172.20.70.229/reading", "root", "root"); break;
+                case "kernel_16"        : sensor = new Sensor("https://172.20.70.238/reading", "root", "root"); break;
+                case "room_1.17"        : sensor = new Sensor("https://172.20.70.234/reading", "root", "root"); break;
+                case "room_1.19"        : sensor = new Sensor("https://172.20.70.235/reading", "root", "root"); break;                
+                case "UTA_A4"           : sensor = new Sensor("https://172.20.70.237/reading", "root", "root"); break;                
+                case "amphitheater_A4"  : sensor = new Sensor("https://172.20.70.231/reading", "root", "root"); break;
+                case "amphitheater_A5"  : sensor = new Sensor("https://172.20.70.233/reading", "root", "root"); break;
+                case "laboratory_1.58"  : sensor = new Sensor("https://172.20.70.236/reading", "root", "root"); break;
+                default                 : System.out.println("*** Error ***: This sensor dows NOT exist");
+            }            
+            double value = sensor.getNewMeasure().getTotalPower();                        
+            long ts = sensor.getNewMeasure().geTimestamp()*1000;            
+            String response = "{ \"sensorId(location)\": \""+sensorId+"\", \"ts\": \""+ts+"\", \"reading\": \""+value+"\"}";            
+            //System.out.println("Stream Tuple >>"+" location="+sensorId+"\tts="+ts+"|"+"\tvalue= "+value);  //DEBUG
             dispacthRequest(t, response);         
         }
     }  
-    
+        
     static class ChartPageRequestHandler implements HttpHandler{        
         public void handle(HttpExchange t) throws IOException {
             String response = readFile("src/httpServer/chartTests.html");
