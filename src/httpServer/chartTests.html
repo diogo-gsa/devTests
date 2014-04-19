@@ -29,7 +29,8 @@
 			 //		{ "ts": "1396883813350", "reading": "757"}
 		     	var readingDate = JSON.parse(dataReading).ts;
 		     	console.log("Readed TS:"+readingDate);
-			 	var readingVal	= JSON.parse(dataReading).reading;
+			 	var readingVal	= ((JSON.parse(dataReading).reading)*1);
+			 	readingVal = (readingVal/1000).toFixed(2)
 		     	var dateR = new Date(readingDate*1); //hack: *1 para converter a string para um inteiro
 				return {date: dateR, val:readingVal};
 			}
@@ -67,14 +68,14 @@
 			chart.pathToImages = "amcharts/images/";	//specifie the image path
 			
 			var dataSet = new AmCharts.DataSet();		//define the chart data set (at least one data have to exist)
-			dataSet.dataProvider = chartData;			//populate the dataset
-			
+			dataSet.dataProvider = chartData;			//populate the dataset			
 			dataSet.fieldMappings = [{fromField:"val", toField:"Watts"}];
 			dataSet.categoryField = "date";
-			
 			chart.dataSets = [dataSet];
 
+			
 			var stockPanel = new AmCharts.StockPanel();
+			stockPanel.title = "kWh"
 			chart.panels = [stockPanel];
 			
 			var panelsSettings = new AmCharts.PanelsSettings();
@@ -123,18 +124,18 @@
 			                          {period:"MAX", label:"MAX"}
 			                       ];
 			
+
 			
 			chart.write("chartdiv");
 			
+			
+			
 			// set up the chart to update every second
 		    setInterval(function () {
-
 		    	//chartData.shift();		    	
 		        //var dataReading = getRequest("/getRecentData");
 		        var dataReading = getRequest("/getLastReading?sensorId=library");		
-		        
 		        var newData = processRequest(dataReading);
-		        
 		        chartData.push(newData);
 		        chart.validateData();
 		        chart.write("chartdiv");

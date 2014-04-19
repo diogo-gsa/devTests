@@ -13,13 +13,13 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-public class Sensor {
+public class SensorDriver {
 
     private String URL;
     private String username;
     private String password;
 
-    public Sensor(String URL, String username, String password) {
+    public SensorDriver(String URL, String username, String password) {
         this.URL = URL;
         this.username = username;
         this.password = password;
