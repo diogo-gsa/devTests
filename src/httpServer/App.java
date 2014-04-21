@@ -26,7 +26,7 @@ import com.sun.net.httpserver.HttpServer;
 public class App {
 
     private static int teste = 1;
-    private static int __PORT__ = 62490;
+    private static int __PORT__ = 62491;
     
     
     public static void main(String[] args) throws Exception { 
@@ -61,8 +61,10 @@ public class App {
             //String sensorId = parametersListURI.split("=")[1];          //extract resource name (eg. amcharts.js)
             
             String getResult = "";
+            String numberOfReadings = "20";
             try {
-                getResult = sendHTTP_GET_Request("http://sb-dev.tagus.ist.utl.pt:62491/library?format=Plain_FileDB");
+                getResult = sendHTTP_GET_Request("http://193.136.166.131:62490/library/last/"+numberOfReadings);
+                dispacthRequest(t, getResult);                         
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -226,7 +228,7 @@ public class App {
         in.close();
  
         //print result
-        System.out.println(response.toString());
+        //System.out.println(response.toString());
         return response.toString();
  
     }
