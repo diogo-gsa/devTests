@@ -13,6 +13,8 @@
 		<script type="text/javascript">
 			//To ensure all the scripts and HTML is loaded
 			
+			
+			
 			function getRequest(url){
 				//document.write("Begin");	
 				var httpRequest = new XMLHttpRequest();
@@ -35,10 +37,12 @@
 				return {date: dateR, val:readingVal};
 			}
 			
-			function pushGraphInitialData(){
-
+			function pushGraphHistoricData(){
+				historicReadings = 6000; //no VAR => t be a global VAR
+				
 				console.log("init");
-				var hreads = getRequest("/getLibraryHistoricReading");
+				var hreads = getRequest("/getLibraryHistoricReading/"+historicReadings);
+				console.log("Request to Server: /getLibraryHistoricReading/"+historicReadings); //DEBUG
 				var historicReadings = hreads.split("\n");
 
 				var array = [];
@@ -62,10 +66,10 @@
 					var readingVal = ((consumption1+consumption2+consumption3)/1000).toFixed(2); 
 				    var readingDate = (JSON.parse(historicReadings[i]).ts)*1000;
 					var dateR =  new Date(readingDate*1);
-					console.log("*** ts:"+dateR*1+"|"+"val:"+readingVal);				    
+					//console.log("*** ts:"+dateR*1+"|"+"val:"+readingVal);				    
 					array.push({date: dateR, val:readingVal});
 				}
-				console.log("end");				
+				console.log("All Historic Data Requested with Success");				
 				return array;
 					
 			}
@@ -76,7 +80,7 @@
 			AmCharts.ready(function(){ 
 			
 			var chartData;
-			chartData = pushGraphInitialData();
+			chartData = pushGraphHistoricData();
 			
 			/*= [ Date -> JScript data type			                 
 			                 {date: new Date(2011, 5, 1, 10, 0, 0, 0), val:10},
@@ -124,7 +128,7 @@
 			graph.valueField = "Watts";
 			graph.type = "smoothedLine"; // options: "line", "column", "step", "smoothedLine", "candlestick", "ohlc" 
 			graph.fillAlphas = 0;
-			graph.title = "Biblioteca";
+			graph.title = "Library";
 			stockPanel.addStockGraph(graph);
 			
 			var categoryAxesSettings = new AmCharts.CategoryAxesSettings();

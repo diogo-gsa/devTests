@@ -56,14 +56,18 @@ public class App {
   //getLastReading(SensorId sensor, List<DatapointAddress> datapoints)
     static class getLibraryHistoricReading implements HttpHandler{
         public void handle(HttpExchange t) throws IOException {
-            // example:  /getLastReading?idSensor=library
+            // example:  /getLibraryHistoricReading/500
             //String parametersListURI = t.getRequestURI().getQuery();    // get the "idSensor=library" URL's part            
             //String sensorId = parametersListURI.split("=")[1];          //extract resource name (eg. amcharts.js)
-            
             String getResult = "";
-            String numberOfReadings = "500";
+            String numberOfReadings = "499"; //defaultValue
+            
+            String parametersListURI = t.getRequestURI().getPath();;    // get the "idSensor=library" URL's part            
+            numberOfReadings = parametersListURI.split("/")[2];          //extract resource name (eg. amcharts.js)
+            
             try {
                 getResult = sendHTTP_GET_Request("http://sb-dev.tagus.ist.utl.pt:62490/library/last/"+numberOfReadings);
+                System.out.println("Request: http://sb-dev.tagus.ist.utl.pt:62490/library/last/"+numberOfReadings); //DEBUG
                 dispacthRequest(t, getResult);                         
             } catch (Exception e) {
                 e.printStackTrace();
