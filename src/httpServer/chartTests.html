@@ -35,15 +35,51 @@
 				return {date: dateR, val:readingVal};
 			}
 			
+			function pushGraphInitialData(){
+
+				console.log("init");
+				var hreads = getRequest("/getLibraryHistoricReading");
+				var historicReadings = hreads.split("\n");
+
+				var array = [];
+				//console.log("teste "+historicReadings[0]+"fim de teste");					
+				
+				for (var i = (historicReadings.length - 2); i > 0; i--) {
+					//console.log("A "+i+"--"+historicReadings[i]);
+					var json;
+					try{
+						json = JSON.parse(historicReadings[i]);
+					}catch(Exception){
+						console.log("Exception");						
+					}	
+					//console.log(phObj);				    					
+					var ph1 = (json.ph)["1"];					
+					var ph2 = (json.ph)["2"];					
+					var ph3 = (json.ph)["3"];					
+					var consumption1 = (ph1.v)*(ph1.c)*(ph1.pf);
+					var consumption2 = (ph2.v)*(ph2.c)*(ph2.pf);
+					var consumption3 = (ph3.v)*(ph3.c)*(ph3.pf);
+					var readingVal = ((consumption1+consumption2+consumption3)/1000).toFixed(2); 
+				    var readingDate = (JSON.parse(historicReadings[i]).ts)*1000;
+					var dateR =  new Date(readingDate*1);
+					console.log("*** ts:"+dateR*1+"|"+"val:"+readingVal);				    
+					array.push({date: dateR, val:readingVal});
+				}
+				console.log("end");				
+				return array;
+					
+			}
 			
 			
 			var day = 1;
 			
 			AmCharts.ready(function(){ 
 			
+			var chartData;
+			chartData = pushGraphInitialData();
 			
-			var chartData= [ //Date -> JScript data type			                 
-			                 /*{date: new Date(2011, 5, 1, 10, 0, 0, 0), val:10},
+			/*= [ Date -> JScript data type			                 
+			                 {date: new Date(2011, 5, 1, 10, 0, 0, 0), val:10},
 			                 {date: new Date(2011, 5, 1, 11, 0, 0, 0), val:11},
 			                 {date: new Date(2011, 5, 1, 12, 0, 0, 0), val:12},
 			                 {date: new Date(2011, 5, 1, 13, 0, 0, 0), val:11},
@@ -52,15 +88,18 @@
 			                 {date: new Date(2011, 5, 1, 16, 0, 0, 0), val:13},
 			                 {date: new Date(2011, 5, 1, 17, 0, 0, 0), val:14},
 			                 {date: new Date(2011, 5, 1, 18, 0, 0, 0), val:17},
-			                 {date: new Date(2011, 5, 1, 19, 0, 0, 0), val:13}*/
-			            ];
+			                 {date: new Date(2011, 5, 1, 19, 0, 0, 0), val:13}
+			            	]; */
 			
 			
+			
+			/*
 			for(var i = 0; i<2; i++){
-		        var dataReading = getRequest("/getLibraryHistoricReading");		
+				//var dataReading = getRequest("/getRecentData");
+		        var dataReading = getRequest("/getLastReading?sensorId=library");		
 				var newData = processRequest(dataReading);
 		        chartData.push(newData);
-			}
+			}*/
 				
 			
 			var chart = new AmCharts.AmStockChart(); 	//Create chart
@@ -128,10 +167,10 @@
 			chart.write("chartdiv");
 			
 			
-			
+		
 			// set up the chart to update every second
 		    setInterval(function () {
-		    	//chartData.shift();		    	
+		    	chartData.shift();  	//to slide the window		    	
 		        //var dataReading = getRequest("/getRecentData");
 		        var dataReading = getRequest("/getLastReading?sensorId=library");		
 		        var newData = processRequest(dataReading);

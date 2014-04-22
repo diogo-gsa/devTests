@@ -61,9 +61,9 @@ public class App {
             //String sensorId = parametersListURI.split("=")[1];          //extract resource name (eg. amcharts.js)
             
             String getResult = "";
-            String numberOfReadings = "20";
+            String numberOfReadings = "500";
             try {
-                getResult = sendHTTP_GET_Request("http://193.136.166.131:62490/library/last/"+numberOfReadings);
+                getResult = sendHTTP_GET_Request("http://sb-dev.tagus.ist.utl.pt:62490/library/last/"+numberOfReadings);
                 dispacthRequest(t, getResult);                         
             } catch (Exception e) {
                 e.printStackTrace();
