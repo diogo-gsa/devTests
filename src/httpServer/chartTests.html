@@ -9,10 +9,29 @@
 		
 		<link rel="stylesheet" href="amcharts/style.css" type="text/css">
 		
+	
 		<!-- JS code  -->
 		<script type="text/javascript">
 			//To ensure all the scripts and HTML is loaded
+			var chartData; 	//GLOBAL VAR
+			var chart;		//GLOBAL VAR
+			var dataSet;
 			
+			
+			function changeTimeWindow(timeWindowSize){
+				console.log("INIT:  changeTime windos to 8h"+"Size:"+chartData.length);
+				chartData.length = 0;
+				console.log("Size:"+chartData.length);				
+				chartData = pushGraphHistoricData(timeWindowSize);
+				dataSet.dataProvider = chartData;
+				console.log("Size:"+chartData.length);								
+				chart.validateData();
+				console.log("Size:"+chartData.length);								
+		        chart.write("chartdiv");
+				console.log("Size:"+chartData.length);						        
+				console.log("END:  changeTime windos to 8h");
+		        
+			}
 			
 			
 			function getRequest(url){
@@ -30,15 +49,16 @@
 		     //   	{date: new Date(2011, 5, 1, 10, 0, 0, 0), val:10},
 			 //		{ "ts": "1396883813350", "reading": "757"}
 		     	var readingDate = JSON.parse(dataReading).ts;
-		     	console.log("Readed TS:"+readingDate);
+		     	//console.log("Readed TS:"+readingDate);
 			 	var readingVal	= ((JSON.parse(dataReading).reading)*1);
 			 	readingVal = (readingVal/1000).toFixed(2)
 		     	var dateR = new Date(readingDate*1); //hack: *1 para converter a string para um inteiro
 				return {date: dateR, val:readingVal};
 			}
 			
-			function pushGraphHistoricData(){
-				historicReadings = 6000; //no VAR => t be a global VAR
+			function pushGraphHistoricData(initHistoricalData){
+					
+				var historicReadings = initHistoricalData*1; //force convertion to int
 				
 				console.log("init");
 				var hreads = getRequest("/getLibraryHistoricReading/"+historicReadings);
@@ -48,7 +68,7 @@
 				var array = [];
 				//console.log("teste "+historicReadings[0]+"fim de teste");					
 				
-				for (var i = (historicReadings.length - 2); i > 0; i--) {
+				for (var i = (historicReadings.length - 2); i > 0; i--) { //read the file in the iverse order to insert data in a FIFO manner
 					//console.log("A "+i+"--"+historicReadings[i]);
 					var json;
 					try{
@@ -79,8 +99,7 @@
 			
 			AmCharts.ready(function(){ 
 			
-			var chartData;
-			chartData = pushGraphHistoricData();
+			chartData = pushGraphHistoricData(13000);
 			
 			/*= [ Date -> JScript data type			                 
 			                 {date: new Date(2011, 5, 1, 10, 0, 0, 0), val:10},
@@ -106,15 +125,16 @@
 			}*/
 				
 			
-			var chart = new AmCharts.AmStockChart(); 	//Create chart
+			chart = new AmCharts.AmStockChart(); 	//Create chart
 			chart.pathToImages = "amcharts/images/";	//specifie the image path
 			
-			var dataSet = new AmCharts.DataSet();		//define the chart data set (at least one data have to exist)
+			dataSet = new AmCharts.DataSet();		//define the chart data set (at least one data have to exist)
 			dataSet.dataProvider = chartData;			//populate the dataset			
 			dataSet.fieldMappings = [{fromField:"val", toField:"Watts"}];
 			dataSet.categoryField = "date";
 			chart.dataSets = [dataSet];
 
+			
 			
 			var stockPanel = new AmCharts.StockPanel();
 			stockPanel.title = "kWh"
@@ -158,11 +178,15 @@
 			chart.periodSelector = periodSelector;
 			
 			periodSelector.periods = [
-			                          {period:"DD", count:1, label:"1 day"}, 
-			                          {period:"DD", selected:true, count:5, label:"5 days"},
-			                          {period:"MM", count:1, label:"1 month"},
-			                          {period:"YYYY", count:1, label:"1 year"},
-			                          {period:"YTD", label:"YTD"},
+									  {period:"mm", count:30, label:"1/2 hour"},
+								      {period:"hh", count:1, label:"1 hour"},								      
+								      {period:"hh", count:8, label:"8 hours"},
+								      {period:"hh", count:12, label:"12 hours"},			                          
+								      {period:"DD", count:1, label:"1 day"}, 
+			                          //{period:"DD", count:5, label:"5 days"},
+			                          //{period:"MM", count:1, label:"1 month"},
+			                          //{period:"YYYY", count:1, label:"1 year"},
+			                          //{period:"YTD", label:"YTD"},
 			                          {period:"MAX", label:"MAX"}
 			                       ];
 			
@@ -182,7 +206,7 @@
 		        chart.validateData();
 		        chart.write("chartdiv");
 		        console.log("ChartArraySize: "+chartData.length);
-		    }, 7000);
+		    }, 30000);
 			
 			
 			});
@@ -191,7 +215,25 @@
 	
 	</head>
 
-	<body>
-		<div id="chartdiv" style="width:90%; height:400px; position:fixed; top: 5%; left: 5%"></div>
+	<body>	
+			<div style="opacity:0.80;position:absolute;width:2000px;height:20px;background-color:#1C1C1C;
+						top:0%;left:0%;font-family:helvetica;font-size: 15px bold;color:#B3F36D">
+				SMART CAMPUS - Taguspark Energy Monitor
+			</div>
+			
+			<div id="chartdiv" style="width:90%; height:400px; position:fixed; top: 10%; left: 5%"></div>
+				
+			
+			<!--  					
+			<div id="buttons" style="width:90%; height:400px; position:fixed; top: 65%; left: 5%">
+				<button type="button" onclick="changeTimeWindow(2880)">8h Time Window</button>
+			</div>
+			
+			
+			<div id="buttons" style="width:90%; height:400px; position:fixed; top: 5%; left: 5%">
+				<button type="button" onclick="changeTimeWindow(2880)">8h Time Window</button>
+			</div> 
+			-->
+	
 	</body>
 </html>
