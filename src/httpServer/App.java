@@ -26,8 +26,8 @@ import com.sun.net.httpserver.HttpServer;
 public class App {
 
     private static int teste = 1;
-    private static int __PORT__ = 62491;
-    
+    private static int __PORT__ = 62493;
+    private static String __URL_DATAACQUISTION_SERVER__ = "http://sb-dev.tagus.ist.utl.pt:62492";
     
     public static void main(String[] args) throws Exception { 
         
@@ -41,10 +41,19 @@ public class App {
         
         // Chart API Handlers
         // example:  /getLastReading?idSensor=library        
-        server.createContext("/getLastReading", new getLastReading());
+//        server.createContext("/getLastReading", new getLastReading());
                  
         // example:  /getHistoricReading?idSensor=library                
-        server.createContext("/getLibraryHistoricReading", new getLibraryHistoricReading());
+//        server.createContext("/getLibraryHistoricReading", new getLibraryHistoricReading());
+        
+        //================= New resources ==================================
+        
+        server.createContext("/getCurrentReading/library", new GET_CurrentReading(SensorID.LIBRARY));
+        // /getHistoricReading/library/int:lastReadings        
+        server.createContext("/getHistoricReading/library", new GET_HistoricReadings(SensorID.LIBRARY));        
+        
+        //==================================================================
+        
         
         
         server.setExecutor(null); // creates a default executor
@@ -53,58 +62,105 @@ public class App {
                
     }
     
-  //getLastReading(SensorId sensor, List<DatapointAddress> datapoints)
-    static class getLibraryHistoricReading implements HttpHandler{
+    
+    static class GET_HistoricReadings  implements HttpHandler{
+        
+        private SensorID id;
+        
+        public GET_HistoricReadings(SensorID id){
+            this.id = id;
+        }
+        
         public void handle(HttpExchange t) throws IOException {
-            // example:  /getLibraryHistoricReading/500
-            //String parametersListURI = t.getRequestURI().getQuery();    // get the "idSensor=library" URL's part            
-            //String sensorId = parametersListURI.split("=")[1];          //extract resource name (eg. amcharts.js)
-            String getResult = "";
-            String numberOfReadings = "499"; //defaultValue
-            
-            String parametersListURI = t.getRequestURI().getPath();;    // get the "idSensor=library" URL's part            
-            numberOfReadings = parametersListURI.split("/")[2];          //extract resource name (eg. amcharts.js)
-            
-            try {
-                getResult = sendHTTP_GET_Request("http://sb-dev.tagus.ist.utl.pt:62490/library/last/"+numberOfReadings);
-                System.out.println("Request: http://sb-dev.tagus.ist.utl.pt:62490/library/last/"+numberOfReadings); //DEBUG
+            String numberOfReadings = t.getRequestURI().getPath().split("/")[3]; //extract resource name (eg. amcharts.js) 
+            try {                
+                String requestedSource = __URL_DATAACQUISTION_SERVER__+"/getHistoricReading/"+id.toString().toLowerCase()+"/"+numberOfReadings;
+                String getResult = sendHTTP_GET_Request(requestedSource);
+                System.out.println(requestedSource); //DEBUG
                 dispacthRequest(t, getResult);                         
             } catch (Exception e) {
                 e.printStackTrace();
-            }
-            
-            //String response = "{ \"sensorId(location)\": \""+sensorId+"\", \"ts\": \""+ts+"\", \"reading\": \""+value+"\"}";            
-            //System.out.println("Stream Tuple >>"+" location="+sensorId+"  ts="+ts+"  value= "+value);  //DEBUG
-            //dispacthRequest(t, response);         
+            }         
         }
-    }  
+    }
     
-    //getLastReading(SensorId sensor, List<DatapointAddress> datapoints)
-    static class getLastReading implements HttpHandler{
-        public void handle(HttpExchange t) throws IOException {
-            // example:  /getLastReading?idSensor=library
-            String parametersListURI = t.getRequestURI().getQuery();    // get the "idSensor=library" URL's part            
-            String sensorId = parametersListURI.split("=")[1];          //extract resource name (eg. amcharts.js)
-            SensorDriver sensor = null;
-            switch(sensorId){
-                case "library"          : sensor = new SensorDriver("https://172.20.70.232/reading", "root", "root"); break;
-                case "kernel_14"        : sensor = new SensorDriver("https://172.20.70.229/reading", "root", "root"); break;
-                case "kernel_16"        : sensor = new SensorDriver("https://172.20.70.238/reading", "root", "root"); break;
-                case "room_1.17"        : sensor = new SensorDriver("https://172.20.70.234/reading", "root", "root"); break;
-                case "room_1.19"        : sensor = new SensorDriver("https://172.20.70.235/reading", "root", "root"); break;                
-                case "UTA_A4"           : sensor = new SensorDriver("https://172.20.70.237/reading", "root", "root"); break;                
-                case "amphitheater_A4"  : sensor = new SensorDriver("https://172.20.70.231/reading", "root", "root"); break;
-                case "amphitheater_A5"  : sensor = new SensorDriver("https://172.20.70.233/reading", "root", "root"); break;
-                case "laboratory_1.58"  : sensor = new SensorDriver("https://172.20.70.236/reading", "root", "root"); break;
-                default                 : System.out.println("*** Error ***: This sensor does NOT exist");
-            }            
-            double value = sensor.getNewMeasure().getTotalPower();                        
-            long ts = sensor.getNewMeasure().geTimestamp()*1000;            
-            String response = "{ \"sensorId(location)\": \""+sensorId+"\", \"ts\": \""+ts+"\", \"reading\": \""+value+"\"}";            
-            System.out.println("Stream Tuple >>"+" location="+sensorId+"  ts="+ts+"  value= "+value);  //DEBUG
-            dispacthRequest(t, response);         
+    
+  //getLastReading(SensorId sensor, List<DatapointAddress> datapoints)
+//    static class getLibraryHistoricReading  implements HttpHandler{
+//        public void handle(HttpExchange t) throws IOException {
+//            // example:  /getLibraryHistoricReading/500
+//            //String parametersListURI = t.getRequestURI().getQuery();    // get the "idSensor=library" URL's part            
+//            //String sensorId = parametersListURI.split("=")[1];          //extract resource name (eg. amcharts.js)
+//            String getResult = "";
+//            String numberOfReadings = "499"; //defaultValue
+//            
+//            String parametersListURI = t.getRequestURI().getPath();;    // get the "idSensor=library" URL's part            
+//            numberOfReadings = parametersListURI.split("/")[2];          //extract resource name (eg. amcharts.js)
+//            
+//            try {
+//                getResult = sendHTTP_GET_Request("http://sb-dev.tagus.ist.utl.pt:62490/library/last/"+numberOfReadings);
+//                System.out.println("Request: http://sb-dev.tagus.ist.utl.pt:62490/library/last/"+numberOfReadings); //DEBUG
+//                dispacthRequest(t, getResult);                         
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            
+//            //String response = "{ \"sensorId(location)\": \""+sensorId+"\", \"ts\": \""+ts+"\", \"reading\": \""+value+"\"}";            
+//            //System.out.println("Stream Tuple >>"+" location="+sensorId+"  ts="+ts+"  value= "+value);  //DEBUG
+//            //dispacthRequest(t, response);         
+//        }
+//    }  
+    
+    static class GET_CurrentReading implements HttpHandler {
+        private SensorID id;
+        
+        public GET_CurrentReading(SensorID id){
+            this.id = id;
         }
-    }  
+        
+        public void handle(HttpExchange t) throws IOException {
+            //SensorDriver sensor = new SensorDriver(IOMetadata.getSensorAddr(id), IOMetadata.getSensorUsername(), IOMetadata.getSensorPassword());
+            //String response = buildJSONmeasureFile(sensor.getNewMeasure());
+            //String getResult = "";
+            try{
+                String requestedSource = __URL_DATAACQUISTION_SERVER__+"/getCurrentReading/"+id.toString().toLowerCase();
+                String getResult = sendHTTP_GET_Request(requestedSource);
+                System.out.println("Request: "+requestedSource); //DEBUG
+                dispacthRequest(t, getResult);               
+            }catch(Exception e){
+                e.printStackTrace();                
+            }
+        }
+    }
+    
+    
+    
+//    //getLastReading(SensorId sensor, List<DatapointAddress> datapoints)
+//    static class getLastReading implements HttpHandler{
+//        public void handle(HttpExchange t) throws IOException {
+//            // example:  /getLastReading?idSensor=library
+//            String parametersListURI = t.getRequestURI().getQuery();    // get the "idSensor=library" URL's part            
+//            String sensorId = parametersListURI.split("=")[1];          //extract resource name (eg. amcharts.js)
+//            SensorDriver sensor = null;
+//            switch(sensorId){
+//                case "library"          : sensor = new SensorDriver("https://172.20.70.232/reading", "root", "root"); break;
+//                case "kernel_14"        : sensor = new SensorDriver("https://172.20.70.229/reading", "root", "root"); break;
+//                case "kernel_16"        : sensor = new SensorDriver("https://172.20.70.238/reading", "root", "root"); break;
+//                case "room_1.17"        : sensor = new SensorDriver("https://172.20.70.234/reading", "root", "root"); break;
+//                case "room_1.19"        : sensor = new SensorDriver("https://172.20.70.235/reading", "root", "root"); break;                
+//                case "UTA_A4"           : sensor = new SensorDriver("https://172.20.70.237/reading", "root", "root"); break;                
+//                case "amphitheater_A4"  : sensor = new SensorDriver("https://172.20.70.231/reading", "root", "root"); break;
+//                case "amphitheater_A5"  : sensor = new SensorDriver("https://172.20.70.233/reading", "root", "root"); break;
+//                case "laboratory_1.58"  : sensor = new SensorDriver("https://172.20.70.236/reading", "root", "root"); break;
+//                default                 : System.out.println("*** Error ***: This sensor does NOT exist");
+//            }            
+//            double value = sensor.getNewMeasure().getTotalPower();                        
+//            long ts = sensor.getNewMeasure().geTimestamp()*1000;            
+//            String response = "{ \"sensorId(location)\": \""+sensorId+"\", \"ts\": \""+ts+"\", \"reading\": \""+value+"\"}";            
+//            System.out.println("Stream Tuple >>"+" location="+sensorId+"  ts="+ts+"  value= "+value);  //DEBUG
+//            dispacthRequest(t, response);         
+//        }
+//    }  
         
     static class ChartPageRequestHandler implements HttpHandler{        
         public void handle(HttpExchange t) throws IOException {

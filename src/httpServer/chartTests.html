@@ -13,10 +13,10 @@
 <!-- JS code  -->
 <script type="text/javascript">
 	//To ensure all the scripts and HTML is loaded
-	var chartData; //GLOBAL VAR
-	var chart; //GLOBAL VAR
+	var chartData; 	//GLOBAL VAR
+	var chart; 		//GLOBAL VAR
 	var dataSet;
-
+/*
 	function changeTimeWindow(timeWindowSize) {
 		console.log("INIT:  changeTime windos to 8h" + "Size:"
 				+ chartData.length);
@@ -32,7 +32,34 @@
 		console.log("END:  changeTime windos to 8h");
 
 	}
+*/
+	function getTotalConsumption(streamTupleJSON){
+		var streamTuple;
+		try {
+			streamTuple = JSON.parse(streamTupleJSON);
+		} catch (Exception) {
+			console.log("Exception on: function getTotalConsumption(streamTupleJSON)");
+		}
+		var ph1 = (streamTuple.ph)["1"];
+		var ph2 = (streamTuple.ph)["2"];
+		var ph3 = (streamTuple.ph)["3"];
+		var consumption1 = (ph1.v) * (ph1.c) * (ph1.pf);
+		var consumption2 = (ph2.v) * (ph2.c) * (ph2.pf);
+		var consumption3 = (ph3.v) * (ph3.c) * (ph3.pf);
+		var readingVal = ((consumption1 + consumption2 + consumption3) / 1000).toFixed(2);
+		return readingVal;
+	}
 
+	function getFixedTimestamp(streamTupleJSON){
+		var streamTuple;
+		try {
+			streamTuple = JSON.parse(streamTupleJSON);
+		} catch (Exception) {
+			console.log("Exception on: function getFixedTimestamp(streamTupleJSON)");
+		}
+		return readingDate = new Date((streamTuple.ts)*1000);
+	}
+	
 	function getRequest(url) {
 		//document.write("Begin");	
 		var httpRequest = new XMLHttpRequest();
@@ -59,14 +86,10 @@
 	}
 
 	function pushGraphHistoricData(initHistoricalData) {
-
 		var historicReadings = initHistoricalData * 1; //force convertion to int
-
 		console.log("init");
-		var hreads = getRequest("/getLibraryHistoricReading/"
-				+ historicReadings);
-		console.log("Request to Server: /getLibraryHistoricReading/"
-				+ historicReadings); //DEBUG
+		var hreads = getRequest("/getHistoricReading/library/"+ historicReadings);
+		console.log("Request to Server: /getHistoricReading/library/"+ historicReadings); //DEBUG
 		var historicReadings = hreads.split("\n");
 
 		var array = [];
@@ -80,7 +103,8 @@
 			} catch (Exception) {
 				console.log("Exception");
 			}
-			//console.log(phObj);				    					
+			// console.log(phObj);	
+			// console.log(">>: "+json);
 			var ph1 = (json.ph)["1"];
 			var ph2 = (json.ph)["2"];
 			var ph3 = (json.ph)["3"];
@@ -99,7 +123,6 @@
 		}
 		console.log("All Historic Data Requested with Success");
 		return array;
-
 	}
 
 	var day = 1;
@@ -181,45 +204,22 @@
 		var periodSelector = new AmCharts.PeriodSelector();
 		chart.periodSelector = periodSelector;
 
-		periodSelector.periods = [ {
-			period : "mm",
-			count : 30,
-			label : "1/2 hour"
-		}, {
-			period : "hh",
-			count : 1,
-			label : "1 hour"
-		}, {
-			period : "hh",
-			count : 8,
-			label : "8 hours"
-		}, {
-			period : "hh",
-			count : 12,
-			label : "12 hours"
-		}, {
-			period : "DD",
-			count : 1,
-			label : "1 day"
-		},
-		//{period:"DD", count:5, label:"5 days"},
-		//{period:"MM", count:1, label:"1 month"},
-		//{period:"YYYY", count:1, label:"1 year"},
-		//{period:"YTD", label:"YTD"},
-		{
-			period : "MAX",
-			label : "MAX"
-		} ];
+		periodSelector.periods = [ {period : "mm",  count : 30, label : "1/2 hour"}, 
+		                           {period : "hh",  count : 1,  label : "1 hour"  }, 
+		                           {period : "hh",  count : 8,  label : "8 hours" }, 
+		                           {period : "hh",  count : 12, label : "12 hours"}, 
+		                           {period : "DD",  count : 1,  label : "1 day"   },
+								   {period : "MAX", label : "MAX"} 
+		                         ];
 
 		chart.write("chartdiv");
-
-		// set up the chart to update every second
+		// set up the chart to update every 10 seconds
 		setInterval(function() {
-			chartData.shift(); //to slide the window		    	
-			//var dataReading = getRequest("/getRecentData");
-			var dataReading = getRequest("/getLastReading?sensorId=library");
-			var newData = processRequest(dataReading);
-			chartData.push(newData);
+			chartData.shift(); //to slide the window		    				
+			var currentReading = getRequest("/getCurrentReading/library");
+			var totalConsumption = getTotalConsumption(currentReading); 			
+			var readingTS = getFixedTimestamp(currentReading);
+			chartData.push({ date : readingTS, val : totalConsumption});
 			chart.validateData();
 			chart.write("chartdiv");
 			console.log("ChartArraySize: " + chartData.length);
@@ -228,15 +228,14 @@
 	});
 </script>
 
+
 </head>
 
 <body>
-	<div
-		style="opacity: 0.80; position: absolute; width: 1500px; height: 25px; background-color: #1C1C1C; top: 0%; left: 0%; font-family: helvetica; font-size: 19px; color: #B3F36D">
-		SMART CAMPUS - IST Taguspark Energy Monitor</div>
+	<div style="opacity: 0.80; position: absolute; width: 100%; height: 25px; background-color: #1C1C1C; top: 0%; left: 0%; font-family: helvetica; font-size: 19px; color: #B3F36D">
+		SMART CAMPUS - IST Taguspark Energy Monitor
+	</div>
 
-	<div id="chartdiv"
-		style="width: 96%; height: 400px; position: fixed; top: 10%; left: 2%"></div>
-
+	<div id="chartdiv" style="width: 96%; height: 400px; position: fixed; top: 10%; left: 2%"></div>
 </body>
 </html>
