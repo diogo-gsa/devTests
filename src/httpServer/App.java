@@ -51,6 +51,11 @@ public class App {
         server.createContext("/getCurrentReading/library", new GET_CurrentReading(SensorID.LIBRARY));
         // /getHistoricReading/library/int:lastReadings        
         server.createContext("/getHistoricReading/library", new GET_HistoricReadings(SensorID.LIBRARY));        
+       
+        server.createContext("/getCurrentReading/department14", new GET_CurrentReading(SensorID.DEPARTMENT_14));
+        // /getHistoricReading/library/int:lastReadings        
+        server.createContext("/getHistoricReading/department14", new GET_HistoricReadings(SensorID.DEPARTMENT_14));        
+        
         
         //==================================================================
         
