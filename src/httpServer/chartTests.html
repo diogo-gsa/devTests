@@ -88,8 +88,9 @@
 	function pushGraphHistoricData(initHistoricalData) {
 		var historicReadings = initHistoricalData * 1; //force convertion to int
 		console.log("init");
-		var hreads = getRequest("/getHistoricReading/library/"+ historicReadings);
-		console.log("Request to Server: /getHistoricReading/library/"+ historicReadings); //DEBUG
+		
+		var hreads = getRequest("/getHistoricReading/department14/"+ historicReadings);
+		console.log("Request to Server: /getHistoricReading/department14/"+ historicReadings); //DEBUG
 		var historicReadings = hreads.split("\n");
 
 		var array = [];
@@ -177,7 +178,7 @@
 		graph.valueField = "Watts";
 		graph.type = "smoothedLine"; // options: "line", "column", "step", "smoothedLine", "candlestick", "ohlc" 
 		graph.fillAlphas = 0;
-		graph.title = "Library";
+		graph.title = "Department 14";
 		stockPanel.addStockGraph(graph);
 
 		var categoryAxesSettings = new AmCharts.CategoryAxesSettings();
@@ -215,8 +216,8 @@
 		chart.write("chartdiv");
 		// set up the chart to update every 10 seconds
 		setInterval(function() {
-			chartData.shift(); //to slide the window		    				
-			var currentReading = getRequest("/getCurrentReading/library");
+			chartData.shift(); //to slide the window	
+			var currentReading = getRequest("/getCurrentReading/department14");
 			var totalConsumption = getTotalConsumption(currentReading); 			
 			var readingTS = getFixedTimestamp(currentReading);
 			chartData.push({ date : readingTS, val : totalConsumption});
